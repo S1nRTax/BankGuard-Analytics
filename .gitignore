@@ -1,0 +1,66 @@
+# --------- Java / Maven ---------
+# Maven target directory
+target/
+# Maven wrapper
+.mvn/
+mvnw
+mvnw.cmd
+# Compiled class files
+*.class
+# Log files
+*.log
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+# Build output
+build/
+# IDE files
+/.idea/
+/.project
+/.settings/
+/vscode/
+# Eclipse files
+.classpath
+.project
+.settings/
+
+# --------- Docker ---------
+# Docker images and containers
+**/docker-compose*.yml
+**/Dockerfile
+# Docker build artifacts
+.docker/
+
+# --------- IDEs and Editors ---------
+# IntelliJ IDEA
+/.idea/
+/*.iml
+# VSCode
+/.vscode/
+/.history
+# Eclipse
+/.classpath
+/.project
+/.settings/
+
+# --------- Operating System Files ---------
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --------- Logs and temp files ---------
+logs/
+*.log
+*.tmp
+
+# --------- Other ---------
+*/target/
+**/generated-sources/
+**/generated-test-sources/
+**/target/
+coverage/
