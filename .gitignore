@@ -26,13 +26,6 @@ build/
 .project
 .settings/
 
-# --------- Docker ---------
-# Docker images and containers
-**/docker-compose*.yml
-**/Dockerfile
-# Docker build artifacts
-.docker/
-
 # --------- IDEs and Editors ---------
 # IntelliJ IDEA
 /.idea/
