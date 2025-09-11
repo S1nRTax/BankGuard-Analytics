@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  transaction-generator:
+    build: ./transaction-generator
+    container_name: transaction-generator
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  stream-processor:
+    build: ./stream-processor
+    container_name: stream-processor
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_REDIS_HOST=redis
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  customer-service:
+    build: ./customer-service
+    container_name: customer-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_REDIS_HOST=redis
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_REDIS_HOST=redis
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+networks:
+  banking-network:
+    external: true
+    name: infrastructure_banking-network
