@@ -33,5 +33,8 @@ public class Transaction {
     private LocalDateTime timestamp;
 
     // Risk-related fields for fraud detection
-    // todo:
+    private String ipAddress;
+    private String deviceId;
+    private Boolean isInternational;
+    private Double riskScore;
 }
