@@ -10,6 +10,8 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_DATASOURCE_USERNAME=banking_user
+      - SPRING_DATASOURCE_PASSWORD=banking_password
     networks:
       - banking-network
     restart: unless-stopped
@@ -18,12 +20,16 @@ services:
     build: ./stream-processor
     container_name: stream-processor
     ports:
-      - "8083:8083"
+      - "8083:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - SERVER_PORT=8082
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_DATASOURCE_USERNAME=banking_user
+      - SPRING_DATASOURCE_PASSWORD=banking_password
       - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
     networks:
       - banking-network
     restart: unless-stopped
@@ -36,7 +42,10 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_DATASOURCE_USERNAME=banking_user
+      - SPRING_DATASOURCE_PASSWORD=banking_password
       - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
     networks:
       - banking-network
     restart: unless-stopped
@@ -45,12 +54,16 @@ services:
     build: ./notification-service
     container_name: notification-service
     ports:
-      - "8082:8082"
+      - "8084:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - SERVER_PORT=8082
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_DATASOURCE_USERNAME=banking_user
+      - SPRING_DATASOURCE_PASSWORD=banking_password
       - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
     networks:
       - banking-network
     restart: unless-stopped
@@ -58,4 +71,4 @@ services:
 networks:
   banking-network:
     external: true
-    name: infrastructure_banking-network
+    name: banking-analytics-infrastructure_banking-network
