@@ -198,3 +198,16 @@ else
 		echo "No test script found. Please create $(SCRIPTS_DIR)/test.sh"; \
 	fi
 endif
+
+# Data-flow test
+test-flow: ## Test complete data flow
+	@echo "$(BLUE)Testing data flow...$(NC)"
+	@echo "1. Checking Kafka topics..."
+	@docker exec kafka kafka-topics --bootstrap-server localhost:29092 --list
+	@echo "2. Producing test message..."
+	@echo '{"transactionId":"test-123","amount":100.0,"customerId":"customer-1","timestamp":"'$(shell date -Iseconds)'"}' | \
+		docker exec -i kafka kafka-console-producer --bootstrap-server localhost:29092 --topic transactions
+	@echo "3. Consuming messages (first 5)..."
+	@timeout 10s docker exec kafka kafka-console-consumer \
+		--bootstrap-server localhost:29092 --topic transactions --from-beginning --max-messages 5 || true
+	@echo "$(GREEN)Data flow test completed!$(NC)"

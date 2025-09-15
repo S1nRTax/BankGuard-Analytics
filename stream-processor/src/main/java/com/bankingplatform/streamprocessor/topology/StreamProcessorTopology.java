@@ -9,8 +9,8 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
+import org.springframework.kafka.support.serializer.JsonSerde;
 
 @Slf4j
 @Component
@@ -24,23 +24,23 @@ public class StreamProcessorTopology {
     public void buildPipeline(StreamsBuilder streamsBuilder) {
         log.info("Building Kafka Streams topology...");
 
-        // Define the source stream
         KStream<String, Transaction> transactionStream = streamsBuilder
                 .stream("banking-transactions",
                         Consumed.with(Serdes.String(), transactionSerde))
-                .peek((key, transaction) ->
+                .peek((key, transaction) -> {
+                    if (transaction != null) {
                         log.debug("Received transaction: {} for customer: {}",
-                                transaction.getTransactionId(), transaction.getCustomerId()));
+                                transaction.getTransactionId(), transaction.getCustomerId());
+                    }
+                });
 
-        // Process each transaction
+        // Process transactions
         transactionStream
                 .filter((key, transaction) -> transaction != null)
-                .peek((key, transaction) ->
-                        log.debug("Processing transaction: {}", transaction.getTransactionId()))
                 .foreach((key, transaction) -> {
                     try {
                         processingService.processTransaction(transaction);
-                        log.debug("Successfully processed transaction: {}", transaction.getTransactionId());
+                        log.debug("Processed transaction: {}", transaction.getTransactionId());
                     } catch (Exception e) {
                         log.error("Error processing transaction {}: {}",
                                 transaction.getTransactionId(), e.getMessage(), e);

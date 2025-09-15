@@ -79,7 +79,7 @@ done
 
 echo ""
 echo -e "${BLUE}=== Network Status ===${NC}"
-if docker network ls | grep -q "infrastructure_banking-network"; then
+if docker network ls | grep -q "infrastructure_banking-platform-network"; then
     echo -e "  ✅ banking-network: ${GREEN}exists${NC}"
 else
     echo -e "  ❌ banking-network: ${RED}missing${NC}"

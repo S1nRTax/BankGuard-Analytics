@@ -13,7 +13,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=banking_user
       - SPRING_DATASOURCE_PASSWORD=banking_password
     networks:
-      - banking-network
+      - banking-platform-network
     restart: unless-stopped
 
   stream-processor:
@@ -31,7 +31,7 @@ services:
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
     networks:
-      - banking-network
+      - banking-platform-network
     restart: unless-stopped
 
   customer-service:
@@ -47,7 +47,7 @@ services:
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
     networks:
-      - banking-network
+      - banking-platform-network
     restart: unless-stopped
 
   notification-service:
@@ -65,10 +65,10 @@ services:
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
     networks:
-      - banking-network
+      - banking-platform-network
     restart: unless-stopped
 
 networks:
-  banking-network:
+  banking-platform-network:
     external: true
-    name: banking-analytics-infrastructure_banking-network
+    name: infrastructure_banking-platform-network
