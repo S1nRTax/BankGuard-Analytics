@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.bankingplatform.notificationservice.model.NotificationType;
+import com.bankingplatform.notificationservice.model.NotificationChannel;
 
 import java.time.LocalDateTime;
 
@@ -30,11 +32,11 @@ public class NotificationTemplateEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private NotificationEntity.NotificationType type;
+    private NotificationType type;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private NotificationEntity.NotificationChannel channel;
+    private NotificationChannel channel;
 
     @Builder.Default
     private String language = "en";
