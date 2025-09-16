@@ -198,7 +198,7 @@ VALUES
     ('CUST005', 'Charlie', 'Brown', 'charlie.brown@email.com', '+1234567894', '654 Cedar Ave, City, State', '1988-07-30', 0)
 ON CONFLICT (customer_id) DO NOTHING;
 
--- Insert sample accounts
+-- Insert sample accounts for the pre-defined sample customers (CUST001-CUST005)
 INSERT INTO accounts (account_number, customer_id, account_type, balance)
 VALUES
     ('ACC001001', 'CUST001', 'CHECKING', 5000.00),
@@ -208,6 +208,31 @@ VALUES
     ('ACC003002', 'CUST003', 'SAVINGS', 25000.00),
     ('ACC004001', 'CUST004', 'CHECKING', 2800.00),
     ('ACC005001', 'CUST005', 'CHECKING', 4600.00)
+ON CONFLICT (account_number) DO NOTHING;
+
+-- Insert a customer record for every possible CUST000001 to CUST0001000
+-- This ensures the FK constraint is satisfied for generated data.
+INSERT INTO customers (customer_id, first_name, last_name, email, risk_score)
+SELECT
+    'CUST' || LPAD(gs::TEXT, 6, '0') as customer_id,
+    'FirstName_' || gs AS first_name,
+    'LastName_' || gs AS last_name,
+    'cust' || LPAD(gs::TEXT, 6, '0') || '@example.com' AS email,
+    0 as risk_score
+FROM generate_series(1, 1000) as gs
+ON CONFLICT (customer_id) DO NOTHING;
+
+-- Pre-populate accounts for the generated customers (CUST000001 to CUST0001000)
+-- The transaction-generator creates 1500 accounts from ACC00000001 to ACC00001500.
+-- We need to ensure these exist and are linked to valid customers.
+-- We'll assign two accounts per customer for the first 750 customers to reach ~1500 accounts.
+INSERT INTO accounts (account_number, customer_id, account_type, balance)
+SELECT
+    'ACC' || LPAD(gs::TEXT, 8, '0') as account_number, -- Generates ACC00000001, ACC00000002, ... ACC00001500
+    'CUST' || LPAD(((gs - 1) / 2 + 1)::TEXT, 6, '0') as customer_id, -- Assigns 2 accounts per customer (CUST000001 gets ACC00000001 & ACC00000002, etc.)
+    CASE WHEN gs % 2 = 0 THEN 'SAVINGS' ELSE 'CHECKING' END as account_type,
+    (random() * 10000 + 100)::DECIMAL(15,2) as balance
+FROM generate_series(1, 1500) as gs -- Generate 1500 accounts
 ON CONFLICT (account_number) DO NOTHING;
 
 -- Create trigger function to update updated_at timestamp

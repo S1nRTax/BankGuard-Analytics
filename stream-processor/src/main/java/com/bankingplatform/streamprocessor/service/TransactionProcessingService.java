@@ -52,7 +52,6 @@ public class TransactionProcessingService {
 
         try {
             log.debug("Starting processing for transaction: {}", transaction.getTransactionId());
-
             // 1. Store the transaction
             TransactionEntity savedTransaction = storeTransaction(transaction);
             log.debug("Transaction stored: {}", savedTransaction.getTransactionId());

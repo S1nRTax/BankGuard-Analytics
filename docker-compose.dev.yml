@@ -9,7 +9,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_analytics
       - SPRING_DATASOURCE_USERNAME=banking_user
       - SPRING_DATASOURCE_PASSWORD=banking_password
     networks:
@@ -25,7 +25,7 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
       - SERVER_PORT=8082
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_analytics
       - SPRING_DATASOURCE_USERNAME=banking_user
       - SPRING_DATASOURCE_PASSWORD=banking_password
       - SPRING_REDIS_HOST=redis
@@ -41,7 +41,7 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_analytics
       - SPRING_DATASOURCE_USERNAME=banking_user
       - SPRING_DATASOURCE_PASSWORD=banking_password
       - SPRING_REDIS_HOST=redis
@@ -59,7 +59,7 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
       - SERVER_PORT=8082
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/banking_analytics
       - SPRING_DATASOURCE_USERNAME=banking_user
       - SPRING_DATASOURCE_PASSWORD=banking_password
       - SPRING_REDIS_HOST=redis

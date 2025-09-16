@@ -18,32 +18,43 @@ import java.time.LocalDateTime;
 public class CustomerSummaryEntity {
 
     @Id
+    @Column(name = "customer_id", nullable = false)
     private String customerId;
 
-    private Long totalTransactions;
+    @Column(name = "total_transactions", nullable = false)
+    private Long totalTransactions = 0L;
 
-    @Column(precision = 15, scale = 2)
-    private BigDecimal totalAmount;
+    @Column(name = "total_amount", precision = 15, scale = 2, nullable = false)
+    private BigDecimal totalAmount = BigDecimal.ZERO;
 
-    @Column(precision = 15, scale = 2)
-    private BigDecimal avgAmount;
+    @Column(name = "avg_amount", precision = 15, scale = 2, nullable = false)
+    private BigDecimal avgAmount = BigDecimal.ZERO;
 
+    @Column(name = "most_frequent_merchant_category")
     private String mostFrequentMerchantCategory;
+
+    @Column(name = "preferred_location")
     private String preferredLocation;
+
+    @Column(name = "last_transaction_time")
     private LocalDateTime lastTransactionTime;
+
+    @Column(name = "avg_risk_score")
     private Double avgRiskScore;
 
     // Time-window metrics
-    private Long transactionsLast1Hour;
+    @Column(name = "transactions_last_1_hour", nullable = false)
+    private Long transactionsLast1Hour = 0L;
 
-    @Column(precision = 15, scale = 2)
-    private BigDecimal amountLast1Hour;
+    @Column(name = "amount_last_1_hour", precision = 15, scale = 2, nullable = false)
+    private BigDecimal amountLast1Hour = BigDecimal.ZERO;
 
-    private Long transactionsLast24Hours;
+    @Column(name = "transactions_last_24_hours", nullable = false)
+    private Long transactionsLast24Hours = 0L;
 
-    @Column(precision = 15, scale = 2)
-    private BigDecimal amountLast24Hours;
+    @Column(name = "amount_last_24_hours", precision = 15, scale = 2, nullable = false)
+    private BigDecimal amountLast24Hours = BigDecimal.ZERO;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }

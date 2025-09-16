@@ -79,17 +79,22 @@ public class CustomerSummaryService {
         return CustomerSummaryEntity.builder()
                 .customerId(customerId)
                 .totalTransactions(1L)
-                .totalAmount(transaction.getStatus() == TransactionStatus.COMPLETED ?
-                        transaction.getAmount() : BigDecimal.ZERO)
-                .avgAmount(transaction.getAmount())
+                .totalAmount(transaction.getStatus() == TransactionStatus.COMPLETED
+                        ? transaction.getAmount()
+                        : BigDecimal.ZERO)
+                .avgAmount(transaction.getStatus() == TransactionStatus.COMPLETED
+                        ? transaction.getAmount()
+                        : BigDecimal.ZERO) // <-- prevent null insert
                 .lastTransactionTime(transaction.getTimestamp())
                 .avgRiskScore(transaction.getRiskScore())
                 .transactionsLast1Hour(0L)
                 .amountLast1Hour(BigDecimal.ZERO)
                 .transactionsLast24Hours(0L)
                 .amountLast24Hours(BigDecimal.ZERO)
+                .updatedAt(LocalDateTime.now())  // <-- required NOT NULL
                 .build();
     }
+
 
     private void updateTimeWindowMetrics(CustomerSummaryEntity summary, String customerId) {
         LocalDateTime now = LocalDateTime.now();

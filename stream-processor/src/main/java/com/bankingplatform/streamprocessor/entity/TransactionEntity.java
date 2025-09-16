@@ -30,6 +30,7 @@ public class TransactionEntity {
     private String accountNumber;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "transaction_type") // i added this
     private TransactionType type;
 
     @Column(precision = 15, scale = 2)

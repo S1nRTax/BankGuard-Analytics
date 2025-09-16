@@ -29,9 +29,6 @@ public class KafkaStreamsConfig {
     @Value("${spring.application.name:stream-processor}")
     private String applicationId;
 
-    /**
-     * Kafka Streams Configuration
-     */
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
     public KafkaStreamsConfiguration kStreamsConfig() {
         Map<String, Object> props = new HashMap<>();
@@ -39,29 +36,26 @@ public class KafkaStreamsConfig {
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId);
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
-        // Correct default serdes
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JsonSerde.class.getName());
 
-        // Performance
+        // Force deserialization into our Transaction model
+        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, Transaction.class.getName());
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+
         props.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE_V2);
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
         props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 10 * 1024 * 1024L);
-
-        // State directory
         props.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams/" + applicationId);
 
-        // Deserialization error handling
+        // Handle deserialization errors gracefully
         props.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
                 org.apache.kafka.streams.errors.LogAndContinueExceptionHandler.class);
 
-        log.info("Kafka Streams configuration initialized with application.id: {}", applicationId);
+        log.info("Kafka Streams config initialized for appId={}", applicationId);
         return new KafkaStreamsConfiguration(props);
     }
 
-    /**
-     * ObjectMapper supporting Java time
-     */
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -69,21 +63,16 @@ public class KafkaStreamsConfig {
         return mapper;
     }
 
-    /**
-     * JsonSerde for Transaction with trusted packages
-     */
     @Bean
-    public JsonSerde<Transaction> transactionSerde() {
-        JsonSerde<Transaction> serde = new JsonSerde<>(Transaction.class, objectMapper());
-
-        Map<String, Object> serdeProps = new HashMap<>();
-        serdeProps.put(JsonDeserializer.TRUSTED_PACKAGES,
+    public JsonSerde<Transaction> transactionSerde(ObjectMapper mapper) {
+        JsonSerde<Transaction> serde = new JsonSerde<>(Transaction.class, mapper);
+        serde.deserializer().ignoreTypeHeaders();  // ignore producer type headers
+        serde.deserializer().trustedPackages(
                 "com.bankingplatform.transactiongenerator.model," +
                         "com.bankingplatform.streamprocessor.model," +
                         "java.util," +
-                        "java.lang");
-
-        serde.configure(serdeProps, false); // false = for values
+                        "java.lang"
+        );
         return serde;
     }
 }

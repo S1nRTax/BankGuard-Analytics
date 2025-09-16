@@ -19,6 +19,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -104,6 +105,8 @@ public class MetricsAggregationService {
 
             // Create metrics entity
             TransactionMetricsEntity metricsEntity = TransactionMetricsEntity.builder()
+                    .id(UUID.randomUUID())
+                    .metricDate(windowStart.toLocalDate())
                     .windowStart(windowStart)
                     .windowEnd(windowEnd)
                     .totalTransactions(totalTxns)
@@ -116,6 +119,9 @@ public class MetricsAggregationService {
                     .avgRiskScore(avgRiskScore)
                     .createdAt(now)
                     .build();
+
+            metricsRepository.save(metricsEntity);
+
 
             metricsRepository.save(metricsEntity);
 

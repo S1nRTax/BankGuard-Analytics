@@ -5,6 +5,7 @@ import com.bankingplatform.streamprocessor.entity.FraudAlertEntity;
 import com.bankingplatform.streamprocessor.model.Transaction;
 import com.bankingplatform.streamprocessor.repository.CustomerSummaryRepository;
 import com.bankingplatform.streamprocessor.repository.FraudAlertRepository;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -90,7 +91,7 @@ public class FraudDetectionService {
 
                 // Send notifications for high-severity alerts
                 alerts.stream()
-                        .filter(alert -> alert.getSeverity() > 0.7)
+                        .filter(alert -> "HIGH".equalsIgnoreCase(alert.getSeverity()))
                         .forEach(alert -> {
                             try {
                                 notificationService.sendFraudAlert(alert);
@@ -98,6 +99,7 @@ public class FraudDetectionService {
                                 log.error("Failed to send fraud alert notification: {}", e.getMessage());
                             }
                         });
+
 
                 log.warn("Generated {} fraud alerts for transaction: {}",
                         alerts.size(), transaction.getTransactionId());
@@ -196,14 +198,18 @@ public class FraudDetectionService {
     private FraudAlertEntity createAlert(Transaction transaction,
                                          FraudAlertEntity.FraudReason reason,
                                          String description,
-                                         Double severity) {
+                                         Double riskScore) {
+        String severity = mapSeverity(riskScore);
+
         return FraudAlertEntity.builder()
                 .alertId(generateAlertId())
                 .customerId(transaction.getCustomerId())
                 .transactionId(transaction.getTransactionId())
+                .alertType(reason.name())
                 .reason(reason)
                 .description(description)
-                .severity(severity)
+                .severity(severity)                  // <-- map to LOW/MEDIUM/HIGH
+                .riskScore((int) Math.round(riskScore * 100)) // <-- store as integer (0–100)
                 .amount(transaction.getAmount())
                 .timestamp(transaction.getTimestamp())
                 .status(FraudAlertEntity.AlertStatus.NEW)
@@ -211,6 +217,12 @@ public class FraudDetectionService {
                 .build();
     }
 
+    private String mapSeverity(Double score) {
+        if (score == null) return "LOW";
+        if (score >= 0.8) return "HIGH";
+        if (score >= 0.5) return "MEDIUM";
+        return "LOW";
+    }
     private String generateAlertId() {
         return "ALERT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }

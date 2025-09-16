@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "fraud_alerts", indexes = {
-        @Index(name = "idx_customer_id_alert", columnList = "customerId"),
+        @Index(name = "idx_customer_id_alert", columnList = "customer_id"),
         @Index(name = "idx_timestamp_alert", columnList = "timestamp"),
         @Index(name = "idx_status", columnList = "status")
 })
@@ -22,20 +22,30 @@ import java.time.LocalDateTime;
 public class FraudAlertEntity {
 
     @Id
+    @Column(name = "alert_id")
     private String alertId;
 
-    @Column(nullable = false)
+    @Column(name = "customer_id", nullable = false)
     private String customerId;
 
+    @Column(name = "transaction_id", nullable = false)
     private String transactionId;
 
+    @Column(name = "alert_type", nullable = false, length = 100)
+    private String alertType;   // <-- new field
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private FraudReason reason;
 
-    @Column(length = 1000)
+    @Column(length = 1000, nullable = false)
     private String description;
 
-    private Double severity;
+    @Column(nullable = false, length = 20)
+    private String severity;    // <-- change Double -> String
+
+    @Column(name = "risk_score", nullable = false)
+    private Integer riskScore;  // <-- new field (int)
 
     @Column(precision = 15, scale = 2)
     private BigDecimal amount;
