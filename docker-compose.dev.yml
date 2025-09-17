@@ -54,7 +54,7 @@ services:
     build: ./notification-service
     container_name: notification-service
     ports:
-      - "8084:8082"
+      - "8084:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SERVER_PORT=8082
@@ -64,6 +64,9 @@ services:
       - SPRING_DATASOURCE_PASSWORD=banking_password
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
+      - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=5
+      - SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=2
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
     networks:
       - banking-platform-network
     restart: unless-stopped
