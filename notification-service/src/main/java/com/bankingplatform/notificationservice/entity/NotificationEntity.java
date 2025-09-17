@@ -1,6 +1,10 @@
 // NotificationEntity.java
 package com.bankingplatform.notificationservice.entity;
 
+import com.bankingplatform.notificationservice.model.NotificationChannel;
+import com.bankingplatform.notificationservice.model.NotificationPriority;
+import com.bankingplatform.notificationservice.model.NotificationStatus;
+import com.bankingplatform.notificationservice.model.NotificationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -74,20 +78,5 @@ public class NotificationEntity {
     private String sourceAlertId; // For fraud alerts
     private String transactionId;
 
-    public enum NotificationType {
-        FRAUD_ALERT, TRANSACTION_CONFIRMATION, ACCOUNT_LOCKED,
-        DAILY_SUMMARY, MARKETING, SYSTEM_NOTIFICATION, PAYMENT_REMINDER
-    }
 
-    public enum NotificationChannel {
-        EMAIL, SMS, PUSH, WEBSOCKET, ALL
-    }
-
-    public enum NotificationPriority {
-        LOW, NORMAL, HIGH, URGENT
-    }
-
-    public enum NotificationStatus {
-        PENDING, SENT, DELIVERED, FAILED, RETRYING, CANCELLED
-    }
 }

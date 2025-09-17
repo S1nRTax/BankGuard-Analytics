@@ -1,6 +1,9 @@
 package com.bankingplatform.notificationservice.repository;
 
 import com.bankingplatform.notificationservice.entity.NotificationEntity;
+import com.bankingplatform.notificationservice.model.NotificationPriority;
+import com.bankingplatform.notificationservice.model.NotificationStatus;
+import com.bankingplatform.notificationservice.model.NotificationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,11 +19,11 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
 
     List<NotificationEntity> findByCustomerIdOrderByCreatedAtDesc(String customerId);
 
-    List<NotificationEntity> findByStatusOrderByCreatedAtAsc(NotificationEntity.NotificationStatus status);
+    List<NotificationEntity> findByStatusOrderByCreatedAtAsc(NotificationStatus status);
 
     List<NotificationEntity> findByStatusAndPriorityOrderByCreatedAtAsc(
-            NotificationEntity.NotificationStatus status,
-            NotificationEntity.NotificationPriority priority);
+            NotificationStatus status,
+            NotificationPriority priority);
 
     @Query("SELECT n FROM NotificationEntity n WHERE n.scheduledTime <= :now " +
             "AND n.status = 'PENDING' ORDER BY n.priority DESC, n.scheduledTime ASC")
@@ -39,14 +42,14 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
     @Query("SELECT COUNT(n) FROM NotificationEntity n WHERE n.status = :status " +
             "AND n.createdAt >= :since")
     Long countByStatusAndCreatedAtAfter(
-            @Param("status") NotificationEntity.NotificationStatus status,
+            @Param("status") NotificationStatus status,
             @Param("since") LocalDateTime since);
 
     Page<NotificationEntity> findByCustomerIdOrderByCreatedAtDesc(
             String customerId, Pageable pageable);
 
     List<NotificationEntity> findByTypeAndCreatedAtBetween(
-            NotificationEntity.NotificationType type,
+            NotificationType type,
             LocalDateTime start,
             LocalDateTime end);
 
