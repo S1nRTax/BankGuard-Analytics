@@ -1,6 +1,5 @@
 // NotificationService.java
 package com.bankingplatform.notificationservice.service;
-
 import com.bankingplatform.notificationservice.entity.CustomerContactEntity;
 import com.bankingplatform.notificationservice.entity.NotificationEntity;
 import com.bankingplatform.notificationservice.model.*;
@@ -15,12 +14,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.bankingplatform.notificationservice.model.NotificationChannel;
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -59,6 +56,16 @@ public class NotificationService {
 
     @Transactional
     public List<NotificationResult> sendNotification(NotificationRequest request) {
+        // Add null check at the beginning
+        if (request == null) {
+            log.error("NotificationRequest is null");
+            notificationsFailed.increment();
+            return List.of(NotificationResult.builder()
+                    .status(com.bankingplatform.notificationservice.model.NotificationStatus.FAILED)
+                    .message("Notification request is null")
+                    .build());
+        }
+
         notificationsProcessed.increment();
 
         try {
@@ -72,7 +79,7 @@ public class NotificationService {
             if (contactOpt.isEmpty()) {
                 log.warn("No contact information found for customer: {}", request.getCustomerId());
                 return List.of(NotificationResult.builder()
-                        .status(NotificationStatus.FAILED)
+                        .status(com.bankingplatform.notificationservice.model.NotificationStatus.FAILED)
                         .message("Customer contact information not found")
                         .build());
             }
@@ -90,7 +97,7 @@ public class NotificationService {
                     NotificationResult result = sendToChannel(request, contact, channel);
                     results.add(result);
 
-                    if (result.getStatus() == NotificationStatus.SENT) {
+                    if (result.getStatus() == com.bankingplatform.notificationservice.model.NotificationStatus.SENT) {
                         notificationsSent.increment();
                     } else {
                         notificationsFailed.increment();
@@ -101,7 +108,7 @@ public class NotificationService {
                     notificationsFailed.increment();
 
                     results.add(NotificationResult.builder()
-                            .status(NotificationStatus.FAILED)
+                            .status(com.bankingplatform.notificationservice.model.NotificationStatus.FAILED)
                             .message("Channel error: " + e.getMessage())
                             .build());
                 }
@@ -117,7 +124,7 @@ public class NotificationService {
             notificationsFailed.increment();
 
             return List.of(NotificationResult.builder()
-                    .status(NotificationStatus.FAILED)
+                    .status(com.bankingplatform.notificationservice.model.NotificationStatus.FAILED)
                     .message("Processing error: " + e.getMessage())
                     .build());
         }
@@ -128,7 +135,7 @@ public class NotificationService {
 
         List<NotificationChannel> channels = new ArrayList<>();
 
-        if (request.getChannel() == NotificationChannel.ALL) {
+        if (request.getChannel() == com.bankingplatform.notificationservice.model.NotificationChannel.ALL) {
             // Send to all enabled channels based on notification type and customer preferences
             if (shouldSendEmail(request, contact)) {
                 channels.add(NotificationChannel.EMAIL);
@@ -167,11 +174,16 @@ public class NotificationService {
 
     private boolean shouldSendWebSocket(NotificationRequest request, CustomerContactEntity contact) {
         // WebSocket is always enabled for real-time notifications
-        return request.getPriority() == NotificationPriority.URGENT ||
-                request.getPriority() == NotificationPriority.HIGH;
+        return request.getPriority() ==
+                com.bankingplatform.notificationservice.model.NotificationPriority.URGENT ||
+                request.getPriority() ==
+                        com.bankingplatform.notificationservice.model.NotificationPriority.HIGH;
     }
 
-    private boolean isNotificationTypeEnabled(NotificationType type,CustomerContactEntity contact) {
+    private boolean isNotificationTypeEnabled(
+            com.bankingplatform.notificationservice.model.NotificationType type,
+            CustomerContactEntity contact) {
+
         return switch (type) {
             case FRAUD_ALERT -> contact.getFraudAlertsEnabled();
             case TRANSACTION_CONFIRMATION -> contact.getTransactionAlertsEnabled();
@@ -183,8 +195,12 @@ public class NotificationService {
     private boolean isChannelEnabled(NotificationChannel channel,
                                      CustomerContactEntity contact) {
         return switch (channel) {
-            case EMAIL -> shouldSendEmail(null, contact);
-            case SMS -> shouldSendSms(null, contact);
+            case EMAIL -> contact.getEmailEnabled() &&
+                    contact.getEmail() != null &&
+                    !contact.getEmail().trim().isEmpty();
+            case SMS -> contact.getSmsEnabled() &&
+                    contact.getPhoneNumber() != null &&
+                    !contact.getPhoneNumber().trim().isEmpty();
             case WEBSOCKET -> true;
             default -> false;
         };
@@ -251,7 +267,7 @@ public class NotificationService {
             case WEBSOCKET -> webSocketService.sendWebSocketNotification(notification, contact);
             default -> NotificationResult.builder()
                     .notificationId(notification.getId())
-                    .status(NotificationStatus.FAILED)
+                    .status(com.bankingplatform.notificationservice.model.NotificationStatus.FAILED)
                     .message("Unsupported channel: " + channel)
                     .build();
         };
@@ -268,7 +284,7 @@ public class NotificationService {
             notification.setExternalId(result.getExternalId());
             notification.setSentAt(result.getSentAt());
 
-            if (result.getStatus() == NotificationStatus.FAILED) {
+            if (result.getStatus() == com.bankingplatform.notificationservice.model.NotificationStatus.FAILED) {
                 notification.setErrorMessage(result.getMessage());
                 notification.setRetryCount(notification.getRetryCount() + 1);
             }
@@ -277,27 +293,36 @@ public class NotificationService {
         });
     }
 
-    // Mapping helper methods
-    private NotificationChannel mapToEntityChannel(NotificationChannel channel) {
+    private NotificationChannel mapToEntityChannel(
+            com.bankingplatform.notificationservice.model.NotificationChannel channel) {
         return NotificationChannel.valueOf(channel.name());
     }
 
-    private NotificationType mapToEntityType(NotificationType type) {
+    private NotificationType mapToEntityType(
+            com.bankingplatform.notificationservice.model.NotificationType type) {
         return NotificationType.valueOf(type.name());
     }
 
-    private NotificationPriority mapToEntityPriority(NotificationPriority priority) {
+    private NotificationPriority mapToEntityPriority(
+            com.bankingplatform.notificationservice.model.NotificationPriority priority) {
         return priority != null ?
                 NotificationPriority.valueOf(priority.name()) :
                 NotificationPriority.NORMAL;
     }
 
-    private NotificationStatus mapToEntityStatus(NotificationStatus status) {
+    private NotificationStatus mapToEntityStatus(
+            com.bankingplatform.notificationservice.model.NotificationStatus status) {
         return NotificationStatus.valueOf(status.name());
     }
 
-    private NotificationType mapToTemplateType(NotificationType type) {
+    private NotificationType mapToTemplateType(
+            com.bankingplatform.notificationservice.model.NotificationType type) {
         return NotificationType.valueOf(type.name());
+    }
+
+    private com.bankingplatform.notificationservice.model.NotificationChannel convertEntityToModelChannel(
+            NotificationChannel entityChannel) {
+        return com.bankingplatform.notificationservice.model.NotificationChannel.valueOf(entityChannel.name());
     }
 
     private String getRecipientAddress(NotificationChannel channel,
